@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="officeactivitytracker.client/officeactivitytracker.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="OfficeActivityTracker.Server/OfficeActivityTracker.Server.csproj" />
+</Solution>

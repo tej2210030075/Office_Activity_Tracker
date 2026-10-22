@@ -1,0 +1,6 @@
+@OfficeActivityTracker.Server_HostAddress = http://localhost:5026
+
+GET {{OfficeActivityTracker.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

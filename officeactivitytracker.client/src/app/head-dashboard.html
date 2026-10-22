@@ -1,0 +1,201 @@
+<div class="dashboard-page">
+
+  <!-- Dashboard Header -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div>
+        <h1>Divisional Head Dashboard</h1>
+        <p>Welcome, {{ user?.fullName || 'Divisional Head' }}</p>
+      </div>
+
+      <button class="logout-button" (click)="logout()">
+        Logout
+      </button>
+    </div>
+  </header>
+
+  <main class="dashboard-content">
+
+    <!-- Division Information -->
+    <section class="division-section">
+      <h2>{{ user?.divisionName || 'Your Division' }}</h2>
+
+      <p class="section-description">
+        Manage your division's activities, assign tasks to employees,
+        and monitor task completion.
+      </p>
+    </section>
+
+    <!-- Loading -->
+    <div class="loading-message" *ngIf="isLoading">
+      Loading tasks, please wait...
+    </div>
+
+    <!-- Error -->
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Summary Cards -->
+    <section class="summary-grid" *ngIf="!isLoading">
+
+      <div class="summary-card">
+        <span class="summary-label">Total Tasks</span>
+        <h2 class="summary-number">{{ tasks.length }}</h2>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-label">Pending Tasks</span>
+        <h2 class="summary-number">{{ pendingTasks }}</h2>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-label">In Progress</span>
+        <h2 class="summary-number">{{ inProgressTasks }}</h2>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-label">Completed Tasks</span>
+        <h2 class="summary-number">{{ completedTasks }}</h2>
+      </div>
+
+    </section>
+
+    <!-- Task Management -->
+    <section class="tasks-card">
+
+      <div class="section-heading">
+        <div>
+          <h2>Division Tasks</h2>
+          <p>View and monitor tasks assigned to your employees.</p>
+        </div>
+
+        <div class="heading-actions">
+          <button class="assign-button"
+                  (click)="goToTaskAssignment()">
+            + Assign New Task
+          </button>
+
+          <button class="refresh-button"
+                  (click)="loadTasks()">
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Tasks Table -->
+      <div class="table-container"
+           *ngIf="!isLoading && tasks.length > 0">
+
+        <table class="tasks-table">
+
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Assigned To</th>
+              <th>Priority</th>
+              <th>Start Date</th>
+              <th>Deadline</th>
+              <th>Progress</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let task of tasks">
+
+              <td>
+                <div class="task-details">
+                  <strong>{{ task.title }}</strong>
+
+                  <small *ngIf="task.description">
+                    {{ task.description }}
+                  </small>
+                </div>
+              </td>
+
+              <td>
+                {{ task.assignedToName || 'Not assigned' }}
+              </td>
+
+              <td>
+                <span class="priority-badge"
+                      [class.priority-low]="task.priority === 'Low'"
+                      [class.priority-medium]="task.priority === 'Medium'"
+                      [class.priority-high]="task.priority === 'High'">
+
+                  {{ task.priority || 'Medium' }}
+                </span>
+              </td>
+
+              <td>
+                {{ task.startDate ? (task.startDate | date:'dd MMM yyyy') : '-' }}
+              </td>
+
+              <td>
+                {{ task.deadline ? (task.deadline | date:'dd MMM yyyy') : '-' }}
+              </td>
+
+              <td>
+                <div class="progress-container">
+
+                  <div class="progress-track">
+                    <div class="progress-fill"
+                         [style.width.%]="task.progressPercentage || 0">
+                    </div>
+                  </div>
+
+                  <span class="progress-text">
+                    {{ task.progressPercentage || 0 }}%
+                  </span>
+
+                </div>
+              </td>
+
+              <!-- Status -->
+              <td>
+                <span class="status-badge"
+                      [class.status-completed]="task.progressPercentage >= 100"
+                      [class.status-pending]="task.progressPercentage === 0"
+                      [class.status-in-progress]="task.progressPercentage > 0 && task.progressPercentage < 100">
+
+                  {{
+                    task.progressPercentage >= 100
+                      ? 'Completed'
+                      : task.progressPercentage === 0
+                        ? 'Pending'
+                        : 'In Progress'
+                  }}
+
+                </span>
+              </td>
+
+            </tr>
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state"
+           *ngIf="!isLoading && tasks.length === 0 && !errorMessage">
+
+        <h3>No Tasks Available</h3>
+
+        <p>
+          You have not assigned any tasks to employees in your division yet.
+        </p>
+
+        <button class="assign-button"
+                (click)="goToTaskAssignment()">
+          Assign Your First Task
+        </button>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>

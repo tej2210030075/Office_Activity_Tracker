@@ -1,0 +1,209 @@
+<div class="page-container">
+
+  <!-- HEADER -->
+  <header class="top-bar">
+
+    <div class="header-title">
+      <h1>Office Activity Tracker</h1>
+      <p>Admin Panel / User Management</p>
+    </div>
+
+    <div class="header-actions">
+
+      <button type="button"
+              class="dashboard-btn"
+              (click)="goToDashboard()">
+        Dashboard
+      </button>
+
+      <button type="button"
+              class="logout-btn"
+              (click)="logout()">
+        Logout
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+
+    <!-- PAGE HEADING -->
+    <section class="page-heading">
+
+      <div>
+        <h2>User Management</h2>
+        <p>View all employees and divisional heads.</p>
+      </div>
+
+      <button type="button"
+              class="refresh-btn"
+              (click)="loadUsers()"
+              [disabled]="isLoading">
+
+        {{ isLoading ? 'Loading...' : 'Refresh Users' }}
+
+      </button>
+
+    </section>
+
+
+    <!-- SUMMARY CARDS -->
+    <section class="summary-section">
+
+      <div class="summary-card">
+        <h3>Total Users</h3>
+        <p class="summary-number">{{ users.length }}</p>
+      </div>
+
+      <div class="summary-card">
+        <h3>Active Users</h3>
+        <p class="summary-number">{{ getActiveUsersCount() }}</p>
+      </div>
+
+      <div class="summary-card">
+        <h3>Employees</h3>
+        <p class="summary-number">{{ getEmployeesCount() }}</p>
+      </div>
+
+      <div class="summary-card">
+        <h3>Divisional Heads</h3>
+        <p class="summary-number">{{ getDivisionalHeadsCount() }}</p>
+      </div>
+
+    </section>
+
+
+    <!-- LOADING MESSAGE -->
+    <div class="loading-message" *ngIf="isLoading">
+      <div class="loading-spinner"></div>
+      <p>Loading users, please wait...</p>
+    </div>
+
+
+    <!-- ERROR MESSAGE -->
+    <div class="error-message"
+         *ngIf="!isLoading && errorMessage">
+
+      <h3>Unable to Load Users</h3>
+      <p>{{ errorMessage }}</p>
+
+      <button type="button"
+              class="refresh-btn"
+              (click)="loadUsers()">
+        Try Again
+      </button>
+
+    </div>
+
+
+    <!-- USER DETAILS TABLE -->
+    <section class="table-section">
+
+      <div class="table-heading">
+
+        <div>
+          <h2>User Details</h2>
+          <p>List of registered users in the system.</p>
+        </div>
+
+        <span class="user-count">
+          {{ users.length }} users
+        </span>
+
+      </div>
+
+
+      <!-- TABLE -->
+      <div class="table-container">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Full Name</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Division</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <!-- USER ROWS -->
+            <tr *ngFor="let user of users">
+
+              <td>{{ user.id }}</td>
+
+              <td class="user-name">
+                {{ user.fullName }}
+              </td>
+
+              <td>{{ user.username }}</td>
+
+              <td>
+                <span class="role-badge"
+                      [ngClass]="{
+                    'admin-role': user.role === 'Admin',
+                    'head-role':
+                      user.role === 'DivisionalHead1' ||
+                      user.role === 'DivisionalHead2',
+                    'employee-role': user.role === 'Employee'
+                  }">
+
+                  {{
+                    user.role === 'DivisionalHead1'
+                      ? 'Divisional Head 1'
+                      : user.role === 'DivisionalHead2'
+                      ? 'Divisional Head 2'
+                      : user.role
+                  }}
+
+                </span>
+              </td>
+
+              <td>{{ user.divisionName }}</td>
+
+              <td>
+                <span class="status-badge"
+                      [class.active]="user.isActive"
+                      [class.inactive]="!user.isActive">
+
+                  <span class="status-dot"></span>
+
+                  {{ user.isActive ? 'Active' : 'Inactive' }}
+
+                </span>
+              </td>
+
+            </tr>
+
+
+            <!-- EMPTY STATE -->
+            <tr *ngIf="!isLoading && !errorMessage && users.length === 0">
+              <td colspan="6" class="empty-message">
+                No users found.
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- FOOTER -->
+  <footer class="page-footer">
+    <p>Office Activity Tracker &copy; 2026</p>
+  </footer>
+
+</div>

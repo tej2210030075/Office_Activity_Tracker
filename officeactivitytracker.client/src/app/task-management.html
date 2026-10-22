@@ -1,0 +1,500 @@
+<div class="page-container">
+
+  <!-- HEADER -->
+  <header class="top-header">
+    <div class="header-content">
+
+      <div class="brand">
+        <h1>Office Activity Tracker</h1>
+        <p>Task Management / {{ currentUser?.role }}</p>
+      </div>
+
+      <div class="header-actions">
+
+        <button type="button"
+                class="btn btn-secondary"
+                (click)="goToDashboard()">
+          Dashboard
+        </button>
+
+        <button type="button"
+                class="btn btn-danger"
+                (click)="logout()">
+          Logout
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- PAGE HEADING -->
+    <section class="page-heading">
+
+      <div>
+        <h2>Task Management</h2>
+        <p>Create tasks, assign employees, and monitor progress.</p>
+      </div>
+
+      <button type="button"
+              class="btn btn-primary"
+              [disabled]="isLoading"
+              (click)="loadInitialData()">
+
+        {{ isLoading ? 'Refreshing...' : 'Refresh Tasks' }}
+
+      </button>
+
+    </section>
+
+    <!-- SUCCESS MESSAGE -->
+    <div *ngIf="successMessage"
+         class="alert alert-success"
+         role="status">
+
+      {{ successMessage }}
+
+    </div>
+
+    <!-- ERROR MESSAGE -->
+    <div *ngIf="errorMessage"
+         class="alert alert-error"
+         role="alert">
+
+      {{ errorMessage }}
+
+      <button type="button"
+              class="alert-close"
+              (click)="errorMessage = ''"
+              aria-label="Dismiss error">
+
+        &times;
+
+      </button>
+
+    </div>
+
+    <!-- STATISTICS -->
+    <section class="statistics-grid">
+
+      <div class="stat-card">
+        <div class="stat-label">Total Tasks</div>
+        <div class="stat-value">{{ tasks.length }}</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value">{{ getPendingTasks() }}</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">In Progress</div>
+        <div class="stat-value">{{ getInProgressTasks() }}</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value">{{ getCompletedTasks() }}</div>
+      </div>
+
+    </section>
+
+    <!-- CREATE TASK FORM: DIVISIONAL HEADS ONLY -->
+    <section class="content-card create-task-card"
+             *ngIf="
+        currentUser?.role === 'DivisionalHead1' ||
+        currentUser?.role === 'DivisionalHead2'
+      ">
+
+      <div class="section-heading">
+        <div>
+          <h2>Create New Task</h2>
+          <p>Assign work to an employee in your division.</p>
+        </div>
+      </div>
+
+      <form #taskForm="ngForm" (ngSubmit)="createTask()">
+
+        <div class="form-grid">
+
+          <!-- TITLE -->
+          <div class="form-group full-width">
+
+            <label for="title">Task Title *</label>
+
+            <input id="title"
+                   name="title"
+                   type="text"
+                   [(ngModel)]="form.title"
+                   placeholder="Enter task title"
+                   maxlength="200"
+                   required>
+
+          </div>
+
+          <!-- DESCRIPTION -->
+          <div class="form-group full-width">
+
+            <label for="description">Description</label>
+
+            <textarea id="description"
+                      name="description"
+                      [(ngModel)]="form.description"
+                      placeholder="Enter task description"
+                      rows="3">
+            </textarea>
+
+          </div>
+
+          <!-- DIVISION -->
+          <div class="form-group">
+
+            <label for="divisionId">Division *</label>
+
+            <select id="divisionId"
+                    name="divisionId"
+                    [(ngModel)]="form.divisionId"
+                    (ngModelChange)="onDivisionChange()"
+                    required>
+
+              <option [ngValue]="0" disabled>
+                Select division
+              </option>
+
+              <option *ngFor="let division of availableDivisions"
+                      [ngValue]="division.id">
+
+                {{ division.name }}
+
+              </option>
+
+            </select>
+
+          </div>
+
+          <!-- EMPLOYEE -->
+          <div class="form-group">
+
+            <label for="assignedToId">Assign Employee *</label>
+
+            <select id="assignedToId"
+                    name="assignedToId"
+                    [(ngModel)]="form.assignedToId"
+                    required>
+
+              <option [ngValue]="0" disabled>
+                Select employee
+              </option>
+
+              <option *ngFor="let employee of availableEmployees"
+                      [ngValue]="employee.id">
+
+                {{ employee.fullName }} ({{ employee.username }})
+
+              </option>
+
+            </select>
+
+            <small *ngIf="form.divisionId && availableEmployees.length === 0">
+
+              No active employees are available in this division.
+
+            </small>
+
+          </div>
+
+          <!-- START DATE -->
+          <div class="form-group">
+
+            <label for="startDate">Start Date *</label>
+
+            <input id="startDate"
+                   name="startDate"
+                   type="date"
+                   [(ngModel)]="form.startDate"
+                   required>
+
+          </div>
+
+          <!-- DEADLINE -->
+          <div class="form-group">
+
+            <label for="deadline">Deadline *</label>
+
+            <input id="deadline"
+                   name="deadline"
+                   type="date"
+                   [(ngModel)]="form.deadline"
+                   [min]="form.startDate"
+                   required>
+
+          </div>
+
+          <!-- PRIORITY -->
+          <div class="form-group">
+
+            <label for="priority">Priority *</label>
+
+            <select id="priority"
+                    name="priority"
+                    [(ngModel)]="form.priority"
+                    required>
+
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+        <!-- FORM BUTTON -->
+        <div class="form-actions">
+
+          <button type="submit"
+                  class="btn btn-primary"
+                  [disabled]="isSaving || !taskForm.valid">
+
+            {{ isSaving ? 'Creating Task...' : 'Create Task' }}
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+    <!-- TASK DETAILS -->
+    <section class="content-card task-details-card">
+
+      <div class="section-heading">
+
+        <div>
+          <h2>Task Details</h2>
+          <p>Tasks and their current progress.</p>
+        </div>
+
+        <span class="task-count">
+
+          {{ tasks.length }}
+          {{ tasks.length === 1 ? 'task' : 'tasks' }}
+
+        </span>
+
+      </div>
+
+      <!-- TEMPORARY DIAGNOSTIC INFORMATION -->
+      <div style="
+          background: #fff3cd;
+          padding: 12px;
+          margin-bottom: 16px;
+          border: 1px solid #e0b84c;
+          border-radius: 8px;
+          color: #222;
+        ">
+
+        <strong>Diagnostic Information</strong>
+
+        <p>Loading: {{ isLoading }}</p>
+
+        <p>Task count: {{ tasks.length }}</p>
+
+        <p>
+          First task:
+          {{ tasks[0]?.title || 'No task found' }}
+        </p>
+
+        <p>Error: {{ errorMessage || 'None' }}</p>
+
+      </div>
+
+      <!-- LOADING STATE -->
+      <div *ngIf="isLoading"
+           class="loading-container">
+
+        <div class="spinner"></div>
+
+        <p>Loading tasks, please wait...</p>
+
+      </div>
+
+      <!-- ERROR STATE -->
+      <div *ngIf="!isLoading && errorMessage && tasks.length === 0"
+           class="empty-state">
+
+        <h3>Unable to display tasks</h3>
+
+        <p>{{ errorMessage }}</p>
+
+        <button type="button"
+                class="btn btn-primary"
+                (click)="loadInitialData()">
+
+          Try Again
+
+        </button>
+
+      </div>
+
+      <!-- EMPTY STATE -->
+      <div *ngIf="!isLoading && !errorMessage && tasks.length === 0"
+           class="empty-state">
+
+        <div class="empty-state-icon">&#128203;</div>
+
+        <h3>No tasks yet</h3>
+
+        <p>There are currently no tasks to display.</p>
+
+      </div>
+
+      <!-- TASK LIST -->
+      <div *ngIf="!isLoading && tasks.length > 0"
+           class="task-list">
+
+        <article class="task-item"
+                 *ngFor="let task of tasks">
+
+          <!-- TASK HEADER -->
+          <div class="task-item-header">
+
+            <div class="task-title-section">
+
+              <h3>{{ task.title }}</h3>
+
+              <p class="task-description">
+
+                {{ task.description || 'No description provided.' }}
+
+              </p>
+
+            </div>
+
+            <span class="priority-badge"
+                  [ngClass]="{
+                'priority-low': task.priority === 'Low',
+                'priority-medium': task.priority === 'Medium',
+                'priority-high': task.priority === 'High'
+              }">
+
+              {{ task.priority }}
+
+            </span>
+
+          </div>
+
+          <!-- TASK INFORMATION -->
+          <div class="task-information">
+
+            <div class="task-info-item">
+
+              <span class="info-label">Assigned To</span>
+
+              <span class="info-value">
+                {{ task.assignedToName }}
+              </span>
+
+            </div>
+
+            <div class="task-info-item">
+
+              <span class="info-label">Assigned By</span>
+
+              <span class="info-value">
+                {{ task.assignedByName }}
+              </span>
+
+            </div>
+
+            <div class="task-info-item">
+
+              <span class="info-label">Division</span>
+
+              <span class="info-value">
+                {{ task.divisionName }}
+              </span>
+
+            </div>
+
+            <div class="task-info-item">
+
+              <span class="info-label">Start Date</span>
+
+              <span class="info-value">
+                {{ task.startDate | date:'dd MMM yyyy' }}
+              </span>
+
+            </div>
+
+            <div class="task-info-item">
+
+              <span class="info-label">Deadline</span>
+
+              <span class="info-value">
+                {{ task.deadline | date:'dd MMM yyyy' }}
+              </span>
+
+            </div>
+
+            <div class="task-info-item">
+
+              <span class="info-label">Status</span>
+
+              <span class="status-badge"
+                    [ngClass]="{
+                  'status-pending': task.status === 'Pending',
+                  'status-progress': task.status === 'In Progress',
+                  'status-completed': task.status === 'Completed'
+                }">
+
+                {{ task.status }}
+
+              </span>
+
+            </div>
+
+          </div>
+
+          <!-- PROGRESS -->
+          <div class="task-progress-section">
+
+            <div class="progress-heading">
+
+              <span>Task Progress</span>
+
+              <strong>{{ task.progressPercentage }}%</strong>
+
+            </div>
+
+            <div class="progress-track">
+
+              <div class="progress-fill"
+                   [ngClass]="getProgressClass(task.progressPercentage)"
+                   [style.width.%]="task.progressPercentage">
+              </div>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="page-footer">
+
+    Office Activity Tracker &copy; 2026
+
+  </footer>
+
+</div>

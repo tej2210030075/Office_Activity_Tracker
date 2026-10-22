@@ -1,0 +1,29 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+
+# .NET build files
+bin/
+obj/
+
+# Angular dependencies and build output
+node_modules/
+dist/
+.angular/
+
+# Environment and secret files
+.env
+.env.*
+!.env.example
+appsettings.Development.json
+secrets.json
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db

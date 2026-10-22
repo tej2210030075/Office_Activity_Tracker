@@ -1,0 +1,178 @@
+<div class="page-container">
+
+  <!-- Header -->
+  <header class="top-bar">
+    <div class="header-title">
+      <h1>Office Activity Tracker</h1>
+      <p>Admin Panel / Division Management</p>
+    </div>
+
+    <nav class="header-actions">
+      <button type="button"
+              class="dashboard-btn"
+              (click)="goToDashboard()">
+        Dashboard
+      </button>
+
+      <button type="button"
+              class="dashboard-btn"
+              (click)="goToUsers()">
+        User Management
+      </button>
+
+      <button type="button"
+              class="logout-btn"
+              (click)="logout()">
+        Logout
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="content">
+
+    <!-- Page Heading -->
+    <section class="page-heading">
+      <div>
+        <h2>Division Management</h2>
+        <p>View divisions, divisional heads, and their employees.</p>
+      </div>
+
+      <button type="button"
+              class="refresh-btn"
+              (click)="loadDivisions()"
+              [disabled]="isLoading">
+        {{ isLoading ? 'Loading...' : 'Refresh' }}
+      </button>
+    </section>
+
+    <!-- Summary Cards -->
+    <section class="summary-section">
+
+      <div class="summary-card">
+        <h3>Total Divisions</h3>
+        <p>{{ totalDivisions }}</p>
+      </div>
+
+      <div class="summary-card">
+        <h3>Total Employees</h3>
+        <p>{{ totalEmployees }}</p>
+      </div>
+
+    </section>
+
+    <!-- Loading State -->
+    <section *ngIf="isLoading" class="table-section">
+      <div class="loading-message">
+        <div class="loading-spinner"></div>
+        <p>Loading divisions...</p>
+      </div>
+    </section>
+
+    <!-- Error State -->
+    <section *ngIf="!isLoading && errorMessage"
+             class="error-message">
+
+      <h3>Unable to Load Divisions</h3>
+      <p>{{ errorMessage }}</p>
+
+      <button type="button"
+              class="refresh-btn"
+              (click)="loadDivisions()">
+        Try Again
+      </button>
+    </section>
+
+    <!-- Division List -->
+    <section *ngIf="!isLoading && !errorMessage && divisions.length > 0"
+             class="division-list">
+
+      <article *ngFor="let division of divisions"
+               class="table-section division-card">
+
+        <!-- Division Heading -->
+        <div class="table-heading">
+          <div>
+            <h3>{{ division.name }}</h3>
+            <p>
+              Divisional Head:
+              <strong>{{ division.headName || 'Not Assigned' }}</strong>
+            </p>
+          </div>
+
+          <span class="user-count">
+            {{ division.employees?.length || 0 }}
+            Employees
+          </span>
+        </div>
+
+        <!-- Employee Table -->
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Employee Name</th>
+                <th>Username</th>
+                <th>Account Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <ng-container *ngIf="division.employees && division.employees.length > 0; else noEmployees">
+
+                <tr *ngFor="let employee of division.employees">
+                  <td>{{ employee.id }}</td>
+
+                  <td class="name-cell">
+                    {{ employee.fullName }}
+                  </td>
+
+                  <td>{{ employee.username }}</td>
+
+                  <td>
+                    <span class="status-badge"
+                          [class.active]="employee.isActive"
+                          [class.inactive]="!employee.isActive">
+
+                      <span class="status-dot"></span>
+
+                      {{ employee.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                </tr>
+
+              </ng-container>
+
+              <ng-template #noEmployees>
+                <tr>
+                  <td colspan="4" class="empty-message">
+                    No employees assigned to this division.
+                  </td>
+                </tr>
+              </ng-template>
+            </tbody>
+          </table>
+        </div>
+
+      </article>
+
+    </section>
+
+    <!-- Empty State -->
+    <section *ngIf="!isLoading && !errorMessage && divisions.length === 0"
+             class="table-section empty-message">
+
+      <h3>No Divisions Found</h3>
+      <p>No divisions are currently available.</p>
+
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="page-footer">
+    <p>Office Activity Tracker &copy; 2026</p>
+  </footer>
+
+</div>

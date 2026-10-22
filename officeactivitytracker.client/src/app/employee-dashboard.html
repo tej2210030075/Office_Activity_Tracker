@@ -1,0 +1,591 @@
+<div class="employee-page">
+
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-inner">
+
+      <div class="brand">
+        <div class="brand-logo">OA</div>
+
+        <div class="brand-text">
+          <h1>Office Activity Tracker</h1>
+          <p>Employee Workspace</p>
+        </div>
+      </div>
+
+      <div class="header-user" *ngIf="currentUser">
+
+        <div class="user-avatar">
+          {{ currentUser.fullName.charAt(0).toUpperCase() }}
+        </div>
+
+        <div class="user-details">
+          <strong>{{ currentUser.fullName }}</strong>
+          <span>
+            {{ currentUser.divisionName || 'Employee' }}
+          </span>
+        </div>
+
+        <button type="button"
+                class="btn-logout"
+                (click)="logout()">
+          Logout
+        </button>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="dashboard-main">
+
+    <!-- Page heading -->
+    <section class="welcome-section">
+
+      <div>
+        <span class="eyebrow">EMPLOYEE DASHBOARD</span>
+
+        <h2>
+          Welcome back,
+          {{ currentUser?.fullName }}!
+        </h2>
+
+        <p>
+          Track your assigned activities, update your progress,
+          and stay on top of your deadlines.
+        </p>
+      </div>
+
+      <button type="button"
+              class="btn-refresh"
+              [disabled]="isLoading"
+              (click)="refreshTasks()">
+
+        <span class="refresh-icon">↻</span>
+
+        {{ isLoading ? 'Refreshing...' : 'Refresh Tasks' }}
+
+      </button>
+
+    </section>
+
+    <!-- Success message -->
+    <div class="alert alert-success"
+         *ngIf="successMessage">
+
+      <span class="alert-icon">✓</span>
+
+      <span>{{ successMessage }}</span>
+
+      <button type="button"
+              class="alert-close"
+              aria-label="Dismiss message"
+              (click)="successMessage = ''">
+        ×
+      </button>
+
+    </div>
+
+    <!-- Error message -->
+    <div class="alert alert-error"
+         *ngIf="errorMessage">
+
+      <span class="alert-icon">!</span>
+
+      <span>{{ errorMessage }}</span>
+
+      <button type="button"
+              class="alert-close"
+              aria-label="Dismiss message"
+              (click)="errorMessage = ''">
+        ×
+      </button>
+
+    </div>
+
+    <!-- Statistics -->
+    <section class="stats-grid">
+
+      <article class="stat-card">
+
+        <div class="stat-top">
+          <div class="stat-icon icon-blue">▤</div>
+          <span>Total Tasks</span>
+        </div>
+
+        <div class="stat-number">
+          {{ tasks.length }}
+        </div>
+
+        <p>Tasks assigned to you</p>
+
+      </article>
+
+      <article class="stat-card">
+
+        <div class="stat-top">
+          <div class="stat-icon icon-orange">◷</div>
+          <span>Pending</span>
+        </div>
+
+        <div class="stat-number">
+          {{ getPendingTasks() }}
+        </div>
+
+        <p>Tasks not yet started</p>
+
+      </article>
+
+      <article class="stat-card">
+
+        <div class="stat-top">
+          <div class="stat-icon icon-light-blue">↗</div>
+          <span>In Progress</span>
+        </div>
+
+        <div class="stat-number">
+          {{ getInProgressTasks() }}
+        </div>
+
+        <p>Tasks currently underway</p>
+
+      </article>
+
+      <article class="stat-card">
+
+        <div class="stat-top">
+          <div class="stat-icon icon-green">✓</div>
+          <span>Completed</span>
+        </div>
+
+        <div class="stat-number">
+          {{ getCompletedTasks() }}
+        </div>
+
+        <p>Tasks successfully completed</p>
+
+      </article>
+
+    </section>
+
+    <!-- Overall progress -->
+    <section class="overall-card">
+
+      <div class="overall-heading">
+
+        <div>
+          <h3>Overall Progress</h3>
+
+          <p>
+            Your average completion across all assigned tasks
+          </p>
+        </div>
+
+        <strong class="overall-percentage">
+          {{ getOverallProgress() }}%
+        </strong>
+
+      </div>
+
+      <div class="progress-track overall-track"
+           role="progressbar"
+           [attr.aria-valuenow]="getOverallProgress()"
+           aria-valuemin="0"
+           aria-valuemax="100">
+
+        <div class="progress-fill"
+             [style.width.%]="getOverallProgress()">
+        </div>
+
+      </div>
+
+      <div class="overall-footer">
+        <span>{{ getCompletedTasks() }} completed</span>
+        <span>{{ tasks.length }} total tasks</span>
+      </div>
+
+    </section>
+
+    <!-- Task section -->
+    <section class="tasks-section">
+
+      <div class="section-heading">
+
+        <div>
+          <span class="eyebrow">WORK MANAGEMENT</span>
+
+          <h2>My Assigned Tasks</h2>
+
+          <p>
+            Review your assignments and keep your progress updated.
+          </p>
+        </div>
+
+        <span class="task-count">
+          {{ tasks.length }}
+          {{ tasks.length === 1 ? 'Task' : 'Tasks' }}
+        </span>
+
+      </div>
+
+      <!-- Loading state -->
+      <div class="state-card"
+           *ngIf="isLoading">
+
+        <div class="spinner"></div>
+
+        <h3>Loading your tasks...</h3>
+
+        <p>
+          Please wait while we retrieve your assignments.
+        </p>
+
+      </div>
+
+      <!-- Empty state -->
+      <div class="state-card empty-state"
+           *ngIf="!isLoading && tasks.length === 0 && !errorMessage">
+
+        <div class="empty-icon">▤</div>
+
+        <h3>No tasks assigned yet</h3>
+
+        <p>
+          Tasks assigned to you by your divisional head
+          will appear here.
+        </p>
+
+        <button type="button"
+                class="btn-secondary"
+                (click)="refreshTasks()">
+          Refresh Tasks
+        </button>
+
+      </div>
+
+      <!-- Task cards -->
+      <div class="task-list"
+           *ngIf="!isLoading && tasks.length > 0">
+
+        <article class="task-card"
+                 *ngFor="let task of tasks">
+
+          <!-- Task heading -->
+          <div class="task-card-heading">
+
+            <div class="task-title-area">
+
+              <span class="task-reference">
+                TASK-{{ task.id }}
+              </span>
+
+              <h3>{{ task.title }}</h3>
+
+            </div>
+
+            <span class="status-badge"
+                  [ngClass]="getProgressClass(task.progressPercentage)">
+
+              {{ getStatusLabel(task) }}
+
+            </span>
+
+          </div>
+
+          <!-- Description -->
+          <p class="task-description">
+            {{ task.description || 'No description provided.' }}
+          </p>
+
+          <!-- Task information -->
+          <div class="task-information">
+
+            <div class="info-item">
+
+              <span class="info-label">Assigned By</span>
+
+              <strong>
+                {{ task.assignedByName || 'Not specified' }}
+              </strong>
+
+            </div>
+
+            <div class="info-item">
+
+              <span class="info-label">Division</span>
+
+              <strong>
+                {{ task.divisionName || 'Not specified' }}
+              </strong>
+
+            </div>
+
+            <div class="info-item">
+
+              <span class="info-label">Start Date</span>
+
+              <strong>
+                {{ task.startDate | date:'dd MMM yyyy' }}
+              </strong>
+
+            </div>
+
+            <div class="info-item">
+
+              <span class="info-label">Deadline</span>
+
+              <strong [class.overdue-text]="isOverdue(task)">
+
+                {{ task.deadline | date:'dd MMM yyyy' }}
+
+                <span *ngIf="isOverdue(task)">
+                  (Overdue)
+                </span>
+
+              </strong>
+
+            </div>
+
+            <div class="info-item">
+
+              <span class="info-label">Priority</span>
+
+              <strong class="priority-badge"
+                      [ngClass]="task.priority.toLowerCase()">
+
+                {{ task.priority }}
+
+              </strong>
+
+            </div>
+
+          </div>
+
+          <!-- Task progress -->
+          <div class="task-progress-section">
+
+            <div class="progress-heading">
+
+              <span>Completion Progress</span>
+
+              <strong>
+                {{ task.progressPercentage }}%
+              </strong>
+
+            </div>
+
+            <div class="progress-track"
+                 role="progressbar"
+                 [attr.aria-valuenow]="task.progressPercentage"
+                 aria-valuemin="0"
+                 aria-valuemax="100">
+
+              <div class="progress-fill"
+                   [ngClass]="getProgressClass(task.progressPercentage)"
+                   [style.width.%]="task.progressPercentage">
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Task footer -->
+          <div class="task-card-footer">
+
+            <div class="task-status-message">
+
+              <span class="status-dot"
+                    [ngClass]="getProgressClass(task.progressPercentage)">
+              </span>
+
+              <span *ngIf="task.progressPercentage === 0">
+                Waiting to be started
+              </span>
+
+              <span *ngIf="
+                    task.progressPercentage>
+                0 &&
+                task.progressPercentage < 100
+                ">
+                Work is in progress
+              </span>
+
+              <span *ngIf="task.progressPercentage === 100">
+                Task completed successfully
+              </span>
+
+            </div>
+
+            <button type="button"
+                    class="btn-primary"
+                    [disabled]="isSaving"
+                    (click)="openProgressEditor(task)">
+
+              {{
+                task.progressPercentage === 100
+                  ? 'Update Progress'
+                  : 'Update Progress'
+              }}
+
+            </button>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Progress update modal -->
+  <div class="modal-overlay"
+       *ngIf="selectedTask"
+       (click)="cancelProgressUpdate()">
+
+    <section class="progress-modal"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="progress-modal-title"
+             (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+
+        <div>
+          <span class="eyebrow">TASK-{{ selectedTask.id }}</span>
+
+          <h2 id="progress-modal-title">
+            Update Task Progress
+          </h2>
+        </div>
+
+        <button type="button"
+                class="modal-close"
+                aria-label="Close dialog"
+                [disabled]="isSaving"
+                (click)="cancelProgressUpdate()">
+          ×
+        </button>
+
+      </div>
+
+      <div class="modal-task-summary">
+
+        <h3>{{ selectedTask.title }}</h3>
+
+        <p>{{ selectedTask.description }}</p>
+
+        <div class="current-progress">
+
+          <span>Current progress</span>
+
+          <strong>
+            {{ selectedTask.progressPercentage }}%
+          </strong>
+
+        </div>
+
+      </div>
+
+      <form #progressForm="ngForm"
+            (ngSubmit)="updateProgress()">
+
+        <div class="form-group">
+
+          <label for="progressPercentage">
+            Completion Percentage
+          </label>
+
+          <div class="percentage-input-wrapper">
+
+            <input id="progressPercentage"
+                   name="progressPercentage"
+                   type="number"
+                   min="0"
+                   max="100"
+                   step="1"
+                   required
+                   [(ngModel)]="updatedProgress"
+                   [disabled]="isSaving">
+
+            <span>%</span>
+
+          </div>
+
+          <div class="range-labels">
+            <span>0% — Not started</span>
+            <span>100% — Completed</span>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="remarks">
+            Remarks
+            <span class="optional-label">(Optional)</span>
+          </label>
+
+          <textarea id="remarks"
+                    name="remarks"
+                    rows="4"
+                    maxlength="1000"
+                    placeholder="Describe the work completed or any pending activities..."
+                    [(ngModel)]="remarks"
+                    [disabled]="isSaving">
+          </textarea>
+
+        </div>
+
+        <div class="modal-error"
+             *ngIf="errorMessage">
+
+          {{ errorMessage }}
+
+        </div>
+
+        <div class="modal-actions">
+
+          <button type="button"
+                  class="btn-secondary"
+                  [disabled]="isSaving"
+                  (click)="cancelProgressUpdate()">
+
+            Cancel
+
+          </button>
+
+          <button type="submit"
+                  class="btn-primary"
+                  [disabled]="isSaving || !progressForm.valid">
+
+            <span class="button-spinner"
+                  *ngIf="isSaving">
+            </span>
+
+            {{ isSaving ? 'Saving...' : 'Save Progress' }}
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="dashboard-footer">
+
+    <span>
+      Office Activity Tracker © 2026. All rights reserved.
+    </span>
+
+    <span>Employee Workspace</span>
+
+  </footer>
+
+</div>

@@ -1,0 +1,51 @@
+<div class="dashboard-container">
+
+  <header class="dashboard-header">
+    <div>
+      <h1>Office Activity Tracker</h1>
+      <p>Administrator Dashboard</p>
+    </div>
+
+    <button class="logout-button" (click)="logout()">
+      Logout
+    </button>
+  </header>
+
+  <main class="dashboard-content">
+
+    <section class="welcome-section">
+      <h2>Welcome, {{ fullName }}!</h2>
+      <p>Manage users, divisions, tasks, and employee progress.</p>
+    </section>
+
+    <section class="dashboard-grid">
+
+      <article class="dashboard-card">
+        <h3>User Management</h3>
+        <p>View registered users, their roles, and divisions.</p>
+        <button (click)="goToUsers()">Manage Users</button>
+      </article>
+
+      <article class="dashboard-card">
+        <h3>Division Management</h3>
+        <p>View and manage organizational divisions.</p>
+        <button (click)="goToDivisions()">Manage Divisions</button>
+      </article>
+
+      <article class="dashboard-card">
+        <h3>Task Management</h3>
+        <p>View and monitor tasks assigned across divisions.</p>
+        <button (click)="goToTasks()">View Tasks</button>
+      </article>
+
+      <article class="dashboard-card">
+        <h3>Progress Monitoring</h3>
+        <p>Review employee task progress and completion status.</p>
+        <button (click)="goToProgress()">View Progress</button>
+      </article>
+
+    </section>
+
+  </main>
+
+</div>

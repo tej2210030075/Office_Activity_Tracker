@@ -1,0 +1,198 @@
+* {
+  box-sizing: border-box;
+}
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #e8efff, #f5f7fb);
+  font-family: Arial, sans-serif;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  padding: 35px;
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+  .login-header h1 {
+    color: #2446a8;
+    font-size: 25px;
+    margin-bottom: 10px;
+  }
+
+  .login-header p {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #ccd2df;
+    border-radius: 7px;
+    font-size: 15px;
+    outline: none;
+  }
+
+    .form-group input:focus {
+      border-color: #2446a8;
+      box-shadow: 0 0 0 3px rgba(36, 70, 168, 0.1);
+    }
+
+button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 7px;
+  background: #2446a8;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+  button:hover:not(:disabled) {
+    background: #193784;
+  }
+
+  button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
+.error-message {
+  color: #c62828;
+  background: #ffebee;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.login-footer {
+  margin-top: 25px;
+  text-align: center;
+  color: #888;
+  font-size: 12px;
+}
+.dashboard-container {
+  min-height: 100vh;
+  background: #f3f6fb;
+  font-family: Arial, sans-serif;
+  color: #1f2937;
+}
+
+.dashboard-header {
+  background: #172554;
+  color: white;
+  padding: 22px 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+  .dashboard-header h1 {
+    margin: 0;
+    font-size: 25px;
+  }
+
+  .dashboard-header p {
+    margin: 7px 0 0;
+    color: #cbd5e1;
+  }
+
+.logout-button {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 11px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.dashboard-content {
+  padding: 35px 5%;
+}
+
+.welcome-section {
+  margin-bottom: 30px;
+}
+
+  .welcome-section h2 {
+    margin-bottom: 8px;
+  }
+
+  .welcome-section p {
+    color: #64748b;
+  }
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.dashboard-card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px #0000000d;
+}
+
+  .dashboard-card h3 {
+    color: #172554;
+    margin-top: 0;
+  }
+
+  .dashboard-card p {
+    color: #64748b;
+    line-height: 1.6;
+  }
+
+  .dashboard-card button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 11px 16px;
+    cursor: pointer;
+  }
+
+    .dashboard-card button:hover {
+      background: #1d4ed8;
+    }
+
+@media (max-width: 700px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-header {
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+}
