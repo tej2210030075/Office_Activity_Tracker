@@ -35,17 +35,387 @@
 
       <div>
         <h2>User Management</h2>
-        <p>View all employees and divisional heads.</p>
+        <p>Manage employees, divisional heads, and user accounts.</p>
       </div>
 
-      <button type="button"
-              class="refresh-btn"
-              (click)="loadUsers()"
-              [disabled]="isLoading">
+      <div class="page-heading-actions">
 
-        {{ isLoading ? 'Loading...' : 'Refresh Users' }}
+        <button type="button"
+                class="add-user-btn"
+                (click)="openAddUserForm()">
+          + Add User
+        </button>
 
-      </button>
+        <button type="button"
+                class="refresh-btn"
+                (click)="loadUsers()"
+                [disabled]="isLoading">
+
+          {{ isLoading ? 'Loading...' : 'Refresh Users' }}
+
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- SUCCESS MESSAGE -->
+    <div class="success-message"
+         *ngIf="successMessage">
+
+      {{ successMessage }}
+
+    </div>
+
+
+    <!-- ADD USER FORM -->
+    <section class="add-user-section"
+             *ngIf="showAddUserForm">
+
+      <div class="form-heading">
+
+        <div>
+          <h2>Add New User</h2>
+          <p>Enter the account details below.</p>
+        </div>
+
+        <button type="button"
+                class="close-form-btn"
+                (click)="closeAddUserForm()"
+                [disabled]="isSavingUser">
+          ✕
+        </button>
+
+      </div>
+
+
+      <!-- ADD USER ERROR -->
+      <div class="form-error-message"
+           *ngIf="formErrorMessage">
+
+        {{ formErrorMessage }}
+
+      </div>
+
+
+      <form (ngSubmit)="saveUser()">
+
+        <div class="user-form-grid">
+
+          <!-- FULL NAME -->
+          <div class="form-field">
+
+            <label for="newFullName">Full Name *</label>
+
+            <input id="newFullName"
+                   name="fullName"
+                   type="text"
+                   [(ngModel)]="newUser.fullName"
+                   placeholder="Enter full name"
+                   required
+                   maxlength="150"
+                   autocomplete="name"
+                   [disabled]="isSavingUser">
+
+          </div>
+
+
+          <!-- USERNAME -->
+          <div class="form-field">
+
+            <label for="newUsername">Username *</label>
+
+            <input id="newUsername"
+                   name="username"
+                   type="text"
+                   [(ngModel)]="newUser.username"
+                   placeholder="Enter username"
+                   required
+                   maxlength="100"
+                   autocomplete="username"
+                   [disabled]="isSavingUser">
+
+          </div>
+
+
+          <!-- PASSWORD -->
+          <div class="form-field">
+
+            <label for="newPassword">Password *</label>
+
+            <input id="newPassword"
+                   name="password"
+                   type="password"
+                   [(ngModel)]="newUser.password"
+                   placeholder="Enter password"
+                   required
+                   autocomplete="new-password"
+                   [disabled]="isSavingUser">
+
+          </div>
+
+
+          <!-- ROLE -->
+          <div class="form-field">
+
+            <label for="newRole">Role *</label>
+
+            <select id="newRole"
+                    name="role"
+                    [(ngModel)]="newUser.role"
+                    required
+                    [disabled]="isSavingUser">
+
+              <option value="Employee">Employee</option>
+              <option value="DivisionalHead1">Divisional Head 1</option>
+              <option value="DivisionalHead2">Divisional Head 2</option>
+              <option value="Admin">Admin</option>
+
+            </select>
+
+          </div>
+
+
+          <!-- DIVISION -->
+          <div class="form-field">
+
+            <label for="newDivision">Division</label>
+
+            <select id="newDivision"
+                    name="divisionId"
+                    [(ngModel)]="newUser.divisionId"
+                    [disabled]="isSavingUser">
+
+              <option [ngValue]="null">Select Division</option>
+
+              <option *ngFor="let division of divisions"
+                      [ngValue]="division.id">
+
+                {{ division.name }}
+
+              </option>
+
+            </select>
+
+            <small>
+              Select a division for employees and divisional heads.
+            </small>
+
+          </div>
+
+
+          <!-- ACCOUNT STATUS -->
+          <div class="form-field status-field">
+
+            <label for="newIsActive">Account Status</label>
+
+            <select id="newIsActive"
+                    name="isActive"
+                    [(ngModel)]="newUser.isActive"
+                    [disabled]="isSavingUser">
+
+              <option [ngValue]="true">Active</option>
+              <option [ngValue]="false">Inactive</option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <!-- ADD USER FORM ACTIONS -->
+        <div class="form-actions">
+
+          <button type="button"
+                  class="cancel-btn"
+                  (click)="closeAddUserForm()"
+                  [disabled]="isSavingUser">
+
+            Cancel
+
+          </button>
+
+          <button type="submit"
+                  class="save-user-btn"
+                  [disabled]="isSavingUser">
+
+            {{ isSavingUser ? 'Creating User...' : 'Create User' }}
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+
+    <!-- EDIT USER FORM -->
+    <section class="add-user-section edit-user-section"
+             *ngIf="showEditUserForm">
+
+      <div class="form-heading">
+
+        <div>
+          <h2>Edit User</h2>
+          <p>Update the selected user's account details.</p>
+        </div>
+
+        <button type="button"
+                class="close-form-btn"
+                (click)="closeEditUserForm()"
+                [disabled]="isUpdatingUser">
+
+          ✕
+
+        </button>
+
+      </div>
+
+
+      <!-- EDIT USER ERROR -->
+      <div class="form-error-message"
+           *ngIf="formErrorMessage">
+
+        {{ formErrorMessage }}
+
+      </div>
+
+
+      <form (ngSubmit)="updateUser()">
+
+        <div class="user-form-grid">
+
+          <!-- FULL NAME -->
+          <div class="form-field">
+
+            <label for="editFullName">Full Name *</label>
+
+            <input id="editFullName"
+                   name="editFullName"
+                   type="text"
+                   [(ngModel)]="editUser.fullName"
+                   placeholder="Enter full name"
+                   required
+                   maxlength="150"
+                   autocomplete="name"
+                   [disabled]="isUpdatingUser">
+
+          </div>
+
+
+          <!-- USERNAME -->
+          <div class="form-field">
+
+            <label for="editUsername">Username *</label>
+
+            <input id="editUsername"
+                   name="editUsername"
+                   type="text"
+                   [(ngModel)]="editUser.username"
+                   placeholder="Enter username"
+                   required
+                   maxlength="100"
+                   autocomplete="username"
+                   [disabled]="isUpdatingUser">
+
+          </div>
+
+
+          <!-- ROLE -->
+          <div class="form-field">
+
+            <label for="editRole">Role *</label>
+
+            <select id="editRole"
+                    name="editRole"
+                    [(ngModel)]="editUser.role"
+                    required
+                    [disabled]="isUpdatingUser">
+
+              <option value="Employee">Employee</option>
+              <option value="DivisionalHead1">Divisional Head 1</option>
+              <option value="DivisionalHead2">Divisional Head 2</option>
+              <option value="Admin">Admin</option>
+
+            </select>
+
+          </div>
+
+
+          <!-- DIVISION -->
+          <div class="form-field">
+
+            <label for="editDivision">Division</label>
+
+            <select id="editDivision"
+                    name="editDivision"
+                    [(ngModel)]="editUser.divisionId"
+                    [disabled]="isUpdatingUser">
+
+              <option [ngValue]="null">Select Division</option>
+
+              <option *ngFor="let division of divisions"
+                      [ngValue]="division.id">
+
+                {{ division.name }}
+
+              </option>
+
+            </select>
+
+            <small>
+              Employees and divisional heads must have a division.
+            </small>
+
+          </div>
+
+
+          <!-- ACCOUNT STATUS -->
+          <div class="form-field status-field">
+
+            <label for="editIsActive">Account Status</label>
+
+            <select id="editIsActive"
+                    name="editIsActive"
+                    [(ngModel)]="editUser.isActive"
+                    [disabled]="isUpdatingUser">
+
+              <option [ngValue]="true">Active</option>
+              <option [ngValue]="false">Inactive</option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <!-- EDIT USER FORM ACTIONS -->
+        <div class="form-actions">
+
+          <button type="button"
+                  class="cancel-btn"
+                  (click)="closeEditUserForm()"
+                  [disabled]="isUpdatingUser">
+
+            Cancel
+
+          </button>
+
+          <button type="submit"
+                  class="save-user-btn"
+                  [disabled]="isUpdatingUser">
+
+            {{ isUpdatingUser ? 'Updating User...' : 'Update User' }}
+
+          </button>
+
+        </div>
+
+      </form>
 
     </section>
 
@@ -54,32 +424,59 @@
     <section class="summary-section">
 
       <div class="summary-card">
+
         <h3>Total Users</h3>
-        <p class="summary-number">{{ users.length }}</p>
+
+        <p class="summary-number">
+          {{ getTotalUsersCount() }}
+        </p>
+
       </div>
 
+
       <div class="summary-card">
+
         <h3>Active Users</h3>
-        <p class="summary-number">{{ getActiveUsersCount() }}</p>
+
+        <p class="summary-number">
+          {{ getActiveUsersCount() }}
+        </p>
+
       </div>
 
+
       <div class="summary-card">
+
         <h3>Employees</h3>
-        <p class="summary-number">{{ getEmployeesCount() }}</p>
+
+        <p class="summary-number">
+          {{ getEmployeesCount() }}
+        </p>
+
       </div>
 
+
       <div class="summary-card">
+
         <h3>Divisional Heads</h3>
-        <p class="summary-number">{{ getDivisionalHeadsCount() }}</p>
+
+        <p class="summary-number">
+          {{ getDivisionalHeadsCount() }}
+        </p>
+
       </div>
 
     </section>
 
 
     <!-- LOADING MESSAGE -->
-    <div class="loading-message" *ngIf="isLoading">
+    <div class="loading-message"
+         *ngIf="isLoading">
+
       <div class="loading-spinner"></div>
+
       <p>Loading users, please wait...</p>
+
     </div>
 
 
@@ -88,40 +485,146 @@
          *ngIf="!isLoading && errorMessage">
 
       <h3>Unable to Load Users</h3>
+
       <p>{{ errorMessage }}</p>
 
       <button type="button"
               class="refresh-btn"
               (click)="loadUsers()">
+
         Try Again
+
       </button>
 
     </div>
 
 
-    <!-- USER DETAILS TABLE -->
-    <section class="table-section">
+    <!-- USER DETAILS SECTION -->
+    <section class="table-section"
+             *ngIf="!isLoading && !errorMessage">
 
+      <!-- TABLE HEADING -->
       <div class="table-heading">
 
         <div>
           <h2>User Details</h2>
-          <p>List of registered users in the system.</p>
+          <p>Search, filter, edit, and review registered user accounts.</p>
         </div>
 
         <span class="user-count">
-          {{ users.length }} users
+
+          {{ filteredUsers.length }}
+
+          {{ filteredUsers.length === 1 ? 'user' : 'users' }}
+
         </span>
 
       </div>
 
 
-      <!-- TABLE -->
+      <!-- SEARCH AND FILTERS -->
+      <section class="user-filters">
+
+        <!-- SEARCH -->
+        <div class="filter-field search-field">
+
+          <label for="userSearch">Search Users</label>
+
+          <input id="userSearch"
+                 type="text"
+                 [(ngModel)]="searchText"
+                 [ngModelOptions]="{standalone: true}"
+                 placeholder="Search by name or username..."
+                 autocomplete="off">
+
+        </div>
+
+
+        <!-- ROLE FILTER -->
+        <div class="filter-field">
+
+          <label for="roleFilter">Role</label>
+
+          <select id="roleFilter"
+                  [(ngModel)]="selectedRole"
+                  [ngModelOptions]="{standalone: true}">
+
+            <option value="">All roles</option>
+            <option value="Admin">Admin</option>
+            <option value="DivisionalHead1">Divisional Head 1</option>
+            <option value="DivisionalHead2">Divisional Head 2</option>
+            <option value="Employee">Employee</option>
+
+          </select>
+
+        </div>
+
+
+        <!-- DIVISION FILTER -->
+        <div class="filter-field">
+
+          <label for="divisionFilter">Division</label>
+
+          <select id="divisionFilter"
+                  [(ngModel)]="selectedDivision"
+                  [ngModelOptions]="{standalone: true}">
+
+            <option value="">All divisions</option>
+
+            <option *ngFor="let division of availableDivisions"
+                    [value]="division">
+
+              {{ division }}
+
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- STATUS FILTER -->
+        <div class="filter-field">
+
+          <label for="statusFilter">Account Status</label>
+
+          <select id="statusFilter"
+                  [(ngModel)]="selectedStatus"
+                  [ngModelOptions]="{standalone: true}">
+
+            <option value="">All statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+
+          </select>
+
+        </div>
+
+
+        <!-- CLEAR FILTERS -->
+        <div class="filter-actions">
+
+          <button type="button"
+                  class="clear-filters-btn"
+                  (click)="clearFilters()">
+
+            Clear Filters
+
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- USER TABLE -->
       <div class="table-container">
 
         <table>
 
+          <!-- TABLE HEADINGS -->
           <thead>
+
             <tr>
               <th>ID</th>
               <th>Full Name</th>
@@ -129,70 +632,113 @@
               <th>Role</th>
               <th>Division</th>
               <th>Status</th>
+              <th>Actions</th>
             </tr>
+
           </thead>
+
 
           <tbody>
 
-            <!-- USER ROWS -->
-            <tr *ngFor="let user of users">
+            <!-- FILTERED USERS -->
+            <tr *ngFor="let user of filteredUsers">
 
               <td>{{ user.id }}</td>
 
-              <td class="user-name">
-                {{ user.fullName }}
-              </td>
+              <td>{{ user.fullName }}</td>
 
               <td>{{ user.username }}</td>
 
-              <td>
-                <span class="role-badge"
-                      [ngClass]="{
-                    'admin-role': user.role === 'Admin',
-                    'head-role':
-                      user.role === 'DivisionalHead1' ||
-                      user.role === 'DivisionalHead2',
-                    'employee-role': user.role === 'Employee'
-                  }">
 
-                  {{
-                    user.role === 'DivisionalHead1'
-                      ? 'Divisional Head 1'
-                      : user.role === 'DivisionalHead2'
-                      ? 'Divisional Head 2'
-                      : user.role
-                  }}
+              <!-- ROLE -->
+              <td>
+
+                <span class="role-badge"
+                      [ngClass]="user.role.toLowerCase()">
+
+                  {{ user.role }}
 
                 </span>
+
               </td>
 
-              <td>{{ user.divisionName }}</td>
 
+              <!-- DIVISION -->
               <td>
-                <span class="status-badge"
-                      [class.active]="user.isActive"
-                      [class.inactive]="!user.isActive">
+                {{ user.divisionName || 'Not Assigned' }}
+              </td>
 
-                  <span class="status-dot"></span>
+
+              <!-- STATUS -->
+              <td>
+
+                <span class="status-badge"
+                      [class.active-status]="user.isActive"
+                      [class.inactive-status]="!user.isActive">
 
                   {{ user.isActive ? 'Active' : 'Inactive' }}
 
                 </span>
+
+              </td>
+
+
+              <!-- ACTIONS -->
+              <td class="user-actions-cell">
+
+                <button type="button"
+                        class="edit-user-btn"
+                        (click)="openEditUserForm(user)">
+
+                  Edit
+
+                </button>
+
               </td>
 
             </tr>
 
 
-            <!-- EMPTY STATE -->
-            <tr *ngIf="!isLoading && !errorMessage && users.length === 0">
-              <td colspan="6" class="empty-message">
-                No users found.
+            <!-- NO RESULTS -->
+            <tr *ngIf="filteredUsers.length === 0">
+
+              <td colspan="7" class="no-results">
+
+                <div class="empty-state">
+
+                  <h3>No Users Found</h3>
+
+                  <p>
+                    No users match your search or selected filters.
+                  </p>
+
+                  <button type="button"
+                          class="inline-clear-btn"
+                          (click)="clearFilters()">
+
+                    Clear Filters
+
+                  </button>
+
+                </div>
+
               </td>
+
             </tr>
 
           </tbody>
 
         </table>
+
+      </div>
+
+
+      <!-- TABLE FOOTER -->
+      <div class="table-footer">
+
+        <p>
+          Showing {{ filteredUsers.length }} of {{ users.length }} users
+        </p>
 
       </div>
 
@@ -203,7 +749,9 @@
 
   <!-- FOOTER -->
   <footer class="page-footer">
+
     <p>Office Activity Tracker &copy; 2026</p>
+
   </footer>
 
 </div>

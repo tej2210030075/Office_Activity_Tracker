@@ -1,51 +1,284 @@
 <div class="dashboard-container">
 
-  <header class="dashboard-header">
-    <div>
-      <h1>Office Activity Tracker</h1>
-      <p>Administrator Dashboard</p>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">OA</div>
+      <div class="brand-text">
+        <h2>Office<span>Track</span></h2>
+        <p>WORKSPACE</p>
+      </div>
     </div>
 
-    <button class="logout-button" (click)="logout()">
-      Logout
-    </button>
-  </header>
+    <div class="sidebar-label">MAIN MENU</div>
 
-  <main class="dashboard-content">
+    <nav class="sidebar-nav">
+      <a class="nav-item active" href="javascript:void(0)">
+        <span class="nav-icon">▦</span>
+        <span>Dashboard</span>
+      </a>
 
-    <section class="welcome-section">
-      <h2>Welcome, {{ fullName }}!</h2>
-      <p>Manage users, divisions, tasks, and employee progress.</p>
-    </section>
+      <a class="nav-item" href="javascript:void(0)" (click)="goToUsers()">
+        <span class="nav-icon">♙</span>
+        <span>User Management</span>
+      </a>
 
-    <section class="dashboard-grid">
+      <a class="nav-item" href="javascript:void(0)" (click)="goToDivisions()">
+        <span class="nav-icon">▤</span>
+        <span>Divisions</span>
+      </a>
 
-      <article class="dashboard-card">
-        <h3>User Management</h3>
-        <p>View registered users, their roles, and divisions.</p>
-        <button (click)="goToUsers()">Manage Users</button>
-      </article>
+      <a class="nav-item" href="javascript:void(0)" (click)="goToTasks()">
+        <span class="nav-icon">☷</span>
+        <span>Task Management</span>
+      </a>
 
-      <article class="dashboard-card">
-        <h3>Division Management</h3>
-        <p>View and manage organizational divisions.</p>
-        <button (click)="goToDivisions()">Manage Divisions</button>
-      </article>
+      <a class="nav-item" href="javascript:void(0)" (click)="goToProgress()">
+        <span class="nav-icon">◷</span>
+        <span>Progress Monitoring</span>
+      </a>
+    </nav>
 
-      <article class="dashboard-card">
-        <h3>Task Management</h3>
-        <p>View and monitor tasks assigned across divisions.</p>
-        <button (click)="goToTasks()">View Tasks</button>
-      </article>
+    <div class="sidebar-bottom">
+      <div class="sidebar-profile">
+        <div class="avatar">{{ fullName ? fullName.charAt(0).toUpperCase() : 'A' }}</div>
+        <div class="profile-details">
+          <strong>{{ fullName }}</strong>
+          <span>Administrator</span>
+        </div>
+      </div>
 
-      <article class="dashboard-card">
-        <h3>Progress Monitoring</h3>
-        <p>Review employee task progress and completion status.</p>
-        <button (click)="goToProgress()">View Progress</button>
-      </article>
+      <button class="sidebar-logout" type="button" (click)="logout()">
+        <span>↪</span> Sign out
+      </button>
+    </div>
+  </aside>
 
-    </section>
+  <!-- Main Area -->
+  <div class="main-area">
 
-  </main>
+    <!-- Top Navigation -->
+    <header class="topbar">
+      <div>
+        <p class="breadcrumb">Workspace / <span>Dashboard</span></p>
+        <h1>Administrator Dashboard</h1>
+      </div>
 
+      <div class="topbar-right">
+        <div class="status-indicator">
+          <span class="status-dot"></span>
+          System Workspace
+        </div>
+
+        <div class="topbar-avatar">
+          {{ fullName ? fullName.charAt(0).toUpperCase() : 'A' }}
+        </div>
+      </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <main class="dashboard-content">
+
+      <section class="welcome-banner">
+        <div class="welcome-copy">
+          <span class="eyebrow">OVERVIEW</span>
+          <h2>Welcome back, {{ fullName }}.</h2>
+          <p>
+            Manage your workforce, oversee divisions, and keep daily operations
+            moving efficiently.
+          </p>
+        </div>
+
+        <div class="welcome-decoration" aria-hidden="true">
+          <div class="decoration-circle circle-one"></div>
+          <div class="decoration-circle circle-two"></div>
+          <div class="decoration-symbol">▦</div>
+        </div>
+      </section>
+
+      <!-- Statistics Overview -->
+      <section class="statistics-section">
+
+        <div class="section-heading">
+          <div>
+            <h2>Performance Overview</h2>
+            <p>A snapshot of your organization's current activity.</p>
+          </div>
+
+          <button class="refresh-button"
+                  type="button"
+                  (click)="loadDashboardStatistics()"
+                  [disabled]="loadingStatistics">
+            ↻ Refresh
+          </button>
+        </div>
+
+        <p *ngIf="loadingStatistics" class="statistics-message">
+          Loading dashboard statistics...
+        </p>
+
+        <p *ngIf="statisticsError" class="statistics-error" role="alert">
+          {{ statisticsError }}
+        </p>
+
+        <div class="statistics-grid" *ngIf="!loadingStatistics && !statisticsError">
+
+          <article class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-label">Active Employees</span>
+              <span class="stat-icon employee-stat-icon">♙</span>
+            </div>
+
+            <div class="stat-value">{{ totalEmployees }}</div>
+            <div class="stat-caption">Active employee accounts</div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-label">Total Tasks</span>
+              <span class="stat-icon task-stat-icon">☷</span>
+            </div>
+
+            <div class="stat-value">{{ totalTasks }}</div>
+            <div class="stat-caption">Tasks across all divisions</div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-label">Completed Tasks</span>
+              <span class="stat-icon completed-stat-icon">✓</span>
+            </div>
+
+            <div class="stat-value">{{ completedTasks }}</div>
+            <div class="stat-caption">
+              {{ totalTasks > 0 ? ((completedTasks / totalTasks) * 100 | number:'1.0-0') : 0 }}% of all tasks
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-label">Overdue Tasks</span>
+              <span class="stat-icon overdue-stat-icon">!</span>
+            </div>
+
+            <div class="stat-value">{{ overdueTasks }}</div>
+            <div class="stat-caption">Incomplete tasks past deadline</div>
+          </article>
+
+        </div>
+
+        <div class="overall-progress-card" *ngIf="!loadingStatistics && !statisticsError">
+          <div class="progress-heading">
+            <div>
+              <h3>Overall Task Progress</h3>
+              <p>Average reported completion across all tasks.</p>
+            </div>
+
+            <strong>{{ overallProgress }}%</strong>
+          </div>
+
+          <div class="progress-track"
+               role="progressbar"
+               [attr.aria-valuenow]="overallProgress"
+               aria-valuemin="0"
+               aria-valuemax="100"
+               aria-label="Overall task progress">
+
+            <div class="progress-fill"
+                 [style.width.%]="overallProgress">
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Management Overview -->
+      <section class="section-heading">
+        <div>
+          <h2>Management Overview</h2>
+          <p>Access your organization's core management areas.</p>
+        </div>
+
+        <span class="section-tag">ADMINISTRATION</span>
+      </section>
+
+      <section class="dashboard-grid">
+
+        <article class="dashboard-card users-card">
+          <div class="card-top">
+            <div class="card-icon users-icon">♙</div>
+            <span class="card-category">PEOPLE</span>
+          </div>
+
+          <h3>User Management</h3>
+          <p>
+            View registered users, review assigned roles, and manage employee
+            records across your organization.
+          </p>
+
+          <button class="card-action" type="button" (click)="goToUsers()">
+            Manage users <span>→</span>
+          </button>
+        </article>
+
+        <article class="dashboard-card divisions-card">
+          <div class="card-top">
+            <div class="card-icon divisions-icon">▤</div>
+            <span class="card-category">ORGANIZATION</span>
+          </div>
+
+          <h3>Division Management</h3>
+          <p>
+            Review organizational divisions and maintain a clear structure
+            across your workforce.
+          </p>
+
+          <button class="card-action" type="button" (click)="goToDivisions()">
+            Explore divisions <span>→</span>
+          </button>
+        </article>
+
+        <article class="dashboard-card tasks-card">
+          <div class="card-top">
+            <div class="card-icon tasks-icon">☷</div>
+            <span class="card-category">OPERATIONS</span>
+          </div>
+
+          <h3>Task Management</h3>
+          <p>
+            Review tasks assigned across divisions and oversee the progress
+            of ongoing work.
+          </p>
+
+          <button class="card-action" type="button" (click)="goToTasks()">
+            View tasks <span>→</span>
+          </button>
+        </article>
+
+        <article class="dashboard-card progress-card">
+          <div class="card-top">
+            <div class="card-icon progress-icon">◷</div>
+            <span class="card-category">PERFORMANCE</span>
+          </div>
+
+          <h3>Progress Monitoring</h3>
+          <p>
+            Review employee progress and completion updates to maintain
+            visibility into daily activities.
+          </p>
+
+          <button class="card-action" type="button" (click)="goToProgress()">
+            Monitor progress <span>→</span>
+          </button>
+        </article>
+
+      </section>
+
+      <footer class="dashboard-footer">
+        <span>OfficeTrack <span class="footer-separator">/</span> Administration</span>
+        <span>Office Activity Tracker</span>
+      </footer>
+
+    </main>
+  </div>
 </div>

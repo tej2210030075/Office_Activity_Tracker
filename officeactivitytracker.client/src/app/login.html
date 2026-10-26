@@ -1,14 +1,24 @@
 <div class="login-page">
+
   <div class="login-card">
 
+    <!-- Left branding section -->
     <div class="login-header">
+
       <h1>Office Activity Tracker</h1>
-      <p>Sign in to continue</p>
+
+      <p>
+        Manage tasks, monitor progress, and keep your team
+        working towards its goals.
+      </p>
+
     </div>
 
+    <!-- Right login section -->
     <form (ngSubmit)="login()" #loginForm="ngForm">
 
       <div class="form-group">
+
         <label for="username">Username</label>
 
         <input id="username"
@@ -16,10 +26,13 @@
                name="username"
                [(ngModel)]="username"
                placeholder="Enter your username"
+               autocomplete="username"
                required>
+
       </div>
 
       <div class="form-group">
+
         <label for="password">Password</label>
 
         <input id="password"
@@ -27,24 +40,27 @@
                name="password"
                [(ngModel)]="password"
                placeholder="Enter your password"
+               autocomplete="current-password"
                required>
+
       </div>
 
-      <!-- Login Error -->
-      <div class="error-message" *ngIf="errorMessage">
+      <!-- Login error -->
+      <div class="error-message"
+           *ngIf="errorMessage"
+           role="alert">
         {{ errorMessage }}
       </div>
 
-      <!-- Login Button -->
+      <!-- Login button -->
       <button type="submit"
               class="login-button"
               [disabled]="loginForm.invalid || isLoading">
-
-        {{ isLoading ? 'Signing in...' : 'Login' }}
-
+        {{ isLoading ? 'Signing in...' : 'Login to your account' }}
       </button>
 
     </form>
 
   </div>
+
 </div>
